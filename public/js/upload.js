@@ -170,8 +170,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mark entrance and exit in the maze
             const markedMaze = markEntranceAndExit(parsedMaze, entrancePos, exitPos);
 
-            // Solve the maze using BFS
-            const solution = solveMazeWithBFS(markedMaze, entrancePos, exitPos);
+            // Solve the maze using the unified BFS approach
+            const solution = solveMaze(markedMaze, entrancePos, exitPos);
 
             if (!solution.solvable) {
                 showResult('This labyrinth has no valid solution. Please check the maze structure.', false);
@@ -239,7 +239,193 @@ document.addEventListener('DOMContentLoaded', function() {
         return markedMaze;
     }
 
-    // Solve the maze using Breadth-First Search (BFS)
+    /**
+     * Unified solution to solve maze using BFS
+     * Works consistently for both upload.js and play.js
+     * 
+     * @param {Array<Array<string>>} maze 2D array representing maze
+     * @param {Object} start Starting position {x, y}
+     * @param {Object} end Ending position {x, y}
+     * @returns {Object} Solution information
+     */
+    function solveMaze(maze, start, end) {
+        // Check for valid inputs
+        if (!start || !end || !maze || !maze.length) {
+            return { solvable: false, path: [] };
+        }
+
+        // Create matrix to track visited cells
+        const height = maze.length;
+        const width = Math.max(...maze.map(row => row.length));
+        const visited = Array(height).fill().map(() => Array(width).fill(false));
+        
+        // Create a distance matrix to track minimum steps to each cell
+        const distance = Array(height).fill().map(() => Array(width).fill(Infinity));
+        
+        // Create matrix to track parent cells for path reconstruction
+        const parent = Array(height).fill().map(() => Array(width).fill(null));
+        
+        // Initialize BFS queue with start position
+        const queue = [];
+        queue.push(start);
+        visited[start.y][start.x] = true;
+        distance[start.y][start.x] = 0;
+        
+        // Check if we're using the maze format with step size 2 
+        // (as in upload.js after column removal)
+        const isStep2Format = checkForStep2Format(maze);
+        
+        // Set direction vectors based on maze format
+        const directions = isStep2Format ? 
+            // For upload.js format (step size 2)
+            [
+                { dx: 2, dy: 0 },   // Right
+                { dx: 0, dy: 2 },   // Down
+                { dx: -2, dy: 0 },  // Left
+                { dx: 0, dy: -2 }   // Up
+            ] : 
+            // For play.js format (step size 1)
+            [
+                { dx: 1, dy: 0 },   // Right
+                { dx: 0, dy: 1 },   // Down
+                { dx: -1, dy: 0 },  // Left
+                { dx: 0, dy: -1 }   // Up
+            ];
+        
+        let found = false;
+        
+        // BFS main loop
+        while (queue.length > 0 && !found) {
+            const current = queue.shift();
+            
+            // Check if we've reached the destination
+            if (current.x === end.x && current.y === end.y) {
+                found = true;
+                break;
+            }
+            
+            // Try all possible directions
+            for (const dir of directions) {
+                const nx = current.x + dir.dx;
+                const ny = current.y + dir.dy;
+                
+                // Check if move is valid based on maze format
+                if (isValidMove(maze, current, {x: nx, y: ny}, visited, isStep2Format)) {
+                    visited[ny][nx] = true;
+                    parent[ny][nx] = current;
+                    distance[ny][nx] = distance[current.y][current.x] + 1;
+                    queue.push({x: nx, y: ny});
+                }
+            }
+        }
+        
+        // If solution found, reconstruct the path
+        if (found) {
+            const path = reconstructPath(parent, start, end);
+            return {
+                solvable: true,
+                path: path,
+                // The solution length is the number of steps, not cells
+                length: path.length - 1
+            };
+        }
+        
+        return { solvable: false, path: [], length: 0 };
+    }
+
+    /**
+     * Check if the maze uses step size 2 format (as in upload.js)
+     */
+    function checkForStep2Format(maze) {
+        // Check for pattern of walls and paths that would indicate a step-2 format
+        // This is a heuristic, but should work for standard mazes
+        
+        // Count odd-position paths and even-position walls
+        let oddPathCount = 0;
+        let evenWallCount = 0;
+        let totalChecked = 0;
+        
+        // Sample the maze to determine format
+        for (let y = 1; y < Math.min(maze.length, 5); y++) {
+            for (let x = 1; x < Math.min(maze[y].length, 5); x++) {
+                totalChecked++;
+                if ((x % 2 === 1) && (y % 2 === 1) && maze[y][x] !== '#') {
+                    oddPathCount++;
+                }
+                if ((x % 2 === 0) && (y % 2 === 0) && maze[y][x] === '#') {
+                    evenWallCount++;
+                }
+            }
+        }
+        
+        // If more than 70% of odd positions are paths, likely step-2 format
+        return (oddPathCount / totalChecked > 0.3);
+    }
+
+    /**
+     * Checks if a move is valid based on maze format
+     */
+    function isValidMove(maze, from, to, visited, isStep2Format) {
+        const { x: toX, y: toY } = to;
+        const { x: fromX, y: fromY } = from;
+        
+        // Check bounds
+        if (toY < 0 || toY >= maze.length || toX < 0 || toX >= maze[0].length) {
+            return false;
+        }
+        
+        // Check if destination is wall or already visited
+        if (maze[toY][toX] === '#' || visited[toY][toX]) {
+            return false;
+        }
+        
+        if (isStep2Format) {
+            // For step-2 format, check the cell in between (for walls)
+            const dx = Math.abs(toX - fromX);
+            const dy = Math.abs(toY - fromY);
+            
+            if ((dx === 2 && dy === 0) || (dx === 0 && dy === 2)) {
+                const midX = Math.min(toX, fromX) + Math.floor(dx / 2);
+                const midY = Math.min(toY, fromY) + Math.floor(dy / 2);
+                
+                // If there's a wall between cells, move is invalid
+                if (maze[midY][midX] === '#') {
+                    return false;
+                }
+                return true;
+            }
+            return false; // Invalid step size
+        }
+        
+        // For step-1 format, just check that we're moving only one cell
+        const dx = Math.abs(toX - fromX);
+        const dy = Math.abs(toY - fromY);
+        return (dx + dy === 1); // Only allow moving one cell at a time
+    }
+
+    /**
+     * Reconstructs the path from start to end using parent pointers
+     */
+    function reconstructPath(parent, start, end) {
+        const path = [];
+        let current = end;
+        
+        // Start from end and work backwards
+        while (current) {
+            path.unshift(current);
+            if (current.x === start.x && current.y === start.y) {
+                break;
+            }
+            current = parent[current.y][current.x];
+        }
+        
+        return path;
+    }
+
+    /**
+     * Legacy implementation kept for reference
+     * @deprecated Use solveMaze instead
+     */
     function solveMazeWithBFS(maze, start, end) {
         // Queue for BFS
         const queue = [{ x: start.x, y: start.y, path: [{ x: start.x, y: start.y }] }];
@@ -272,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const ny = y + dir.dy;
 
                 // Check if the new position is valid
-                if (isValidMove(maze, x, y, nx, ny, visited)) {
+                if (isValidOldMove(maze, x, y, nx, ny, visited)) {
                     // Mark as visited
                     visited.add(`${nx},${ny}`);
 
@@ -287,8 +473,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return { solvable: false, path: [] };
     }
 
-    // Check if a move is valid
-    function isValidMove(maze, fromX, fromY, toX, toY, visited) {
+    /**
+     * Legacy validation check kept for reference
+     * @deprecated Use isValidMove instead
+     */
+    function isValidOldMove(maze, fromX, fromY, toX, toY, visited) {
         // Check if destination is out of bounds
         if (toY < 0 || toY >= maze.length || toX < 0 || toX >= maze[toY].length) {
             return false;
@@ -373,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
             size: `${width} x ${height}`,
             difficulty: difficulty,
             remarks: remarks || '',
-            solutionLength: solution.path.length - 1, // Calculate actual solution length
+            solutionLength: solution.length || solution.path.length - 1, // Use new length property if available
             creatorName: username
         };
     }
