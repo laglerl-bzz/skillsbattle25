@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Labyrinth - Upload</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<script>
+    // Load the navigation bar
+    fetch('components/nav.html')
+            .then(response => response.text())
+            .then(data => {
+              document.getElementById('navigation-placeholder').innerHTML = data;
+
+              const script = document.createElement('script');
+              script.src = 'components/nav.js'; // Updated path to match your project structure
+              document.body.appendChild(script);
+            });
+  </script>
+<body>
+<!-- Navigation placeholder -->
+<div id="navigation-placeholder"></div>
+
+<div class="container upload-container">
+  <h1>Maze</h1>
+
+  <div class="upload-form">
+    <div class="form-row">
+      <label>Choose a file:</label>
+      <div class="file-input-group">
+        <input type="file" id="labFile" accept=".txt" style="display: none;">
+        <button onclick="document.getElementById('labFile').click()" class="file-button">Choose file</button>
+        <span id="fileStatus" class="file-status">No file</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="labName">Name</label>
+      <input type="text" id="labName" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+      <label>Size</label>
+      <div class="size-inputs">
+        <div class="number-input">
+          <input type="number" id="sizeWidth" min="1" max="30" value="10">
+          <div class="number-arrows">
+            <button type="button" class="arrow up" onclick="incrementValue('sizeWidth')">▲</button>
+            <button type="button" class="arrow down" onclick="decrementValue('sizeWidth')">▼</button>
+          </div>
+        </div>
+        <div class="number-input">
+          <input type="number" id="sizeHeight" min="1" max="30" value="10">
+          <div class="number-arrows">
+            <button type="button" class="arrow up" onclick="incrementValue('sizeHeight')">▲</button>
+            <button type="button" class="arrow down" onclick="decrementValue('sizeHeight')">▼</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Difficulty</label>
+      <div class="star-rating">
+        <span class="star" data-value="1">☆</span>
+        <span class="star" data-value="2">☆</span>
+        <span class="star" data-value="3">☆</span>
+        <span class="star" data-value="4">☆</span>
+        <span class="star" data-value="5">☆</span>
+      </div>
+      <input type="hidden" id="difficulty" value="0">
+    </div>
+
+    <div class="form-row">
+      <label for="remarks">Info (optional)</label>
+      <textarea id="remarks" rows="5" placeholder="Type here"></textarea>
+    </div>
+
+    <div class="form-buttons">
+      <button type="button" id="saveButton" class="primary-button">Save</button>
+      <button type="button" id="cancelButton" class="secondary-button" onclick="window.location.href='menu.html'">Cancel</button>
+    </div>
+  </div>
+
+  <div id="resultMessage" class="result-message hidden"></div>
+</div>
+<script src="js/upload.js"></script>
+</body>
+</html>

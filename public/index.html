@@ -1,33 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Labyrinth - Start</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-    <h1>JSON Data Table</h2>
+<body class="welcome-page">
+  <div class="welcome-container">
+    <h1 class="welcome-title">Willkommen zum Labyrinth!</h1>
+    <input type="text" id="username" placeholder="Gib deinen Namen ein" />
+    <button class="primary-button" onclick="goToMenu()">Weiter</button>
+  </div>
 
-    <form method="POST" id="newTestForm">
-        <input type="text" name="testRow" id="testRow">
-        <input type="button" value="Submit" onclick="submitNewTest()">
-    </form>
+  <script>
+    function goToMenu() {
+      const name = document.getElementById('username').value.trim();
+      if (!name) {
+        alert('Bitte gib deinen Namen ein.');
+        return;
+      }
+      localStorage.setItem('username', name);
+      window.location.href = 'menu.html';
+    }
+    
+    // Auto-focus on the username input field
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('username').focus();
+    });
 
-    <table id="dataTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Test Row</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-
+    // Allow Enter key to submit
+    document.getElementById('username').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        goToMenu();
+      }
+    });
+  </script>
 </body>
-
-<script src="script.js"></script>
 </html>

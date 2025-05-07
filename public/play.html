@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Labyrinth - Play</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Navigation placeholder -->
+  <div id="navigation-placeholder"></div>
+  
+  <script>
+    // Load the navigation bar
+    fetch('components/nav.html')
+            .then(response => response.text())
+            .then(data => {
+              document.getElementById('navigation-placeholder').innerHTML = data;
+
+              const script = document.createElement('script');
+              script.src = 'components/nav.js'; // Updated path to match your project structure
+              document.body.appendChild(script);
+            });
+  </script>
+  
+  <div class="container maze-container">
+    <h1>Play Maze</h1>
+    
+    <div class="maze-layout">
+      <!-- Left section: Maze list and filters -->
+      <div class="maze-list-section">
+        <h2>Available Mazes</h2>
+        
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filter-group">
+            <label for="filterDifficulty">Difficulty:</label>
+            <select id="filterDifficulty">
+              <option value="">All</option>
+              <option value="1">1 Star</option>
+              <option value="2">2 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="5">5 Stars</option>
+            </select>
+            <label for="filterSize">Size:</label>
+            <input type="text" id="filterSize" placeholder="e.g. 10">
+            <button id="resetFilters" class="secondary-button">Reset</button>
+          </div>
+        </div>
+        
+        <!-- Maze table -->
+        <div class="maze-table-container">
+          <table class="maze-table" id="mazeTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Difficulty</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="mazeTableBody">
+              <!-- Maze entries will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Right section: Maze display and controls -->
+      <div class="maze-display-section">
+        <div id="mazeDisplayContainer">
+          <canvas id="mazeCanvas" width="400" height="400"></canvas>
+        </div>
+        
+        <div class="maze-controls">
+          <button id="solveButton" class="primary-button">Auto Solve</button>
+          <button id="resetButton" class="secondary-button">Reset</button>
+        </div>
+        
+        <div id="solutionInfo" class="solution-info hidden">
+          <p>Solution length: <span id="solutionLength">0</span> steps</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status messages -->
+    <div id="statusMessage" class="hidden"></div>
+  </div>
+
+  <script src="js/play.js"></script>
+</body>
+</html>

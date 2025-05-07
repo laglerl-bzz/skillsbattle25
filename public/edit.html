@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Labyrinth - Edit</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container edit-container">
+    <h1>Edit Maze</h1>
+
+    <div class="edit-form">
+      <div class="form-row">
+        <label for="labName">Name</label>
+        <input type="text" id="labName" placeholder="Name">
+      </div>
+
+      <div class="form-row">
+        <label>Size</label>
+        <div class="size-display" id="sizeDisplay">-- x --</div>
+      </div>
+
+      <div class="form-row">
+        <label>Difficulty</label>
+        <div class="star-rating">
+          <span class="star" data-value="1">☆</span>
+          <span class="star" data-value="2">☆</span>
+          <span class="star" data-value="3">☆</span>
+          <span class="star" data-value="4">☆</span>
+          <span class="star" data-value="5">☆</span>
+        </div>
+        <input type="hidden" id="difficulty" value="0">
+      </div>
+
+      <div class="form-row">
+        <label for="remarks">Info</label>
+        <textarea id="remarks" rows="5" placeholder="Type here"></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>Maze Preview</label>
+        <div id="mazePreview" class="maze-preview-container">
+          <canvas id="mazeCanvas" width="400" height="400"></canvas>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" id="saveButton" class="primary-button">Save Changes</button>
+        <button type="button" id="cancelButton" class="secondary-button">Cancel</button>
+      </div>
+    </div>
+    
+    <div id="resultMessage" class="result-message hidden"></div>
+  </div>
+
+  <script src="js/edit.js"></script>
+</body>
+</html>

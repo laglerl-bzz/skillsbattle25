@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Labyrinth - Menu</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+  <!-- Navigation placeholder -->
+  <div id="navigation-placeholder"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1>Welcome <span id="username"></span></h1>
+    </div>
+
+    <div class="question">
+      <p>What do you want to do?</p>
+    </div>
+
+    <div class="options">
+      <div class="option">
+        <button onclick="goToUpload()">Upload</button>
+        <p>Upload a labyrinth saved in a txt File into the database.</p>
+      </div>
+
+      <div class="option">
+        <button onclick="goToPlay()">Play</button>
+        <p>Play a labyrinth.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load the navigation bar
+    fetch('components/nav.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('navigation-placeholder').innerHTML = data;
+
+        const script = document.createElement('script');
+        script.src = 'components/nav.js'; // Updated path to match your project structure
+        document.body.appendChild(script);
+      });
+
+    // Display the username when the page loads
+    window.onload = function () {
+      const username = localStorage.getItem('username');
+      if (!username) {
+        // Redirect to index if username is not set
+        window.location.href = 'index.html';
+      } else {
+        document.getElementById('username').textContent = username;
+      }
+    };
+
+    function goToUpload() {
+      window.location.href = 'upload.html';
+    }
+
+    function goToPlay() {
+      window.location.href = 'play.html';
+    }
+  </script>
+</body>
+
+</html>
